@@ -1,6 +1,6 @@
 'use strict'
 
-const through = require('pull-through')
+var through = require('pull-through')
 
 module.exports = function block (size, opts) {
   if (!opts) opts = {}
@@ -10,7 +10,7 @@ module.exports = function block (size, opts) {
   }
   size = size || 512
 
-  let zeroPadding
+  var zeroPadding
 
   if (opts.nopad) {
     zeroPadding = false
@@ -18,8 +18,8 @@ module.exports = function block (size, opts) {
     zeroPadding = typeof opts.zeroPadding !== 'undefined' ? opts.zeroPadding : true
   }
 
-  let buffered = []
-  let bufferedBytes = 0
+  var buffered = []
+  var bufferedBytes = 0
 
   return through(function transform (data) {
     if (typeof data === 'number') {
@@ -29,14 +29,14 @@ module.exports = function block (size, opts) {
     buffered.push(data)
 
     while (bufferedBytes >= size) {
-      const b = Buffer.concat(buffered)
+      var b = Buffer.concat(buffered)
       bufferedBytes -= size
       this.queue(b.slice(0, size))
       buffered = [ b.slice(size, b.length) ]
     }
   }, function flush (end) {
     if (bufferedBytes && zeroPadding) {
-      const zeroes = new Buffer(size - bufferedBytes)
+      var zeroes = new Buffer(size - bufferedBytes)
       zeroes.fill(0)
       buffered.push(zeroes)
       this.queue(Buffer.concat(buffered))
