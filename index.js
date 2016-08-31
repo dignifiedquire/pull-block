@@ -41,7 +41,7 @@ module.exports = function block (size, opts) {
       buffered.push(zeroes)
       this.queue(Buffer.concat(buffered))
       buffered = null
-    } else if (bufferedBytes) {
+    } else if (bufferedBytes && buffered) {
       this.queue(Buffer.concat(buffered))
       buffered = null
     }
