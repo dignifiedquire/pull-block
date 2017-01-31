@@ -42,12 +42,9 @@ module.exports = function block (size, opts) {
         var zeroes = new Buffer(size - bufferedBytes)
         zeroes.fill(0)
         buffered.push(zeroes)
-        this.queue(Buffer.concat(buffered))
-        buffered = null
-      } else {
-        this.queue(Buffer.concat(buffered))
-        buffered = null
       }
+      this.queue(Buffer.concat(buffered))
+      buffered = null
     }
     this.queue(null)
   })
