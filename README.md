@@ -66,6 +66,8 @@ Create a new through stream `b` that outputs chunks of length `size` or
 
 When `opts.zeroPadding` is false, do not zero-pad the last chunk.
 
+When `opts.emitEmpty` is true (default is `false`), emit a zero-sized buffer when the source is empty or only feeds in zero-length buffers.
+
 # License
 
 MIT
