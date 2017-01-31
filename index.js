@@ -20,6 +20,7 @@ module.exports = function block (size, opts) {
 
   var buffered = []
   var bufferedBytes = 0
+  var emittedChunk = false
 
   return through(function transform (data) {
     if (typeof data === 'number') {
@@ -33,19 +34,21 @@ module.exports = function block (size, opts) {
       bufferedBytes -= size
       this.queue(b.slice(0, size))
       buffered = [ b.slice(size, b.length) ]
+      emittedChunk = true
     }
   }, function flush (end) {
-    if (bufferedBytes && zeroPadding) {
-      var zeroes = new Buffer(size - bufferedBytes)
-      zeroes.fill(0)
-      buffered.push(zeroes)
-      this.queue(Buffer.concat(buffered))
-      buffered = null
-    } else if (bufferedBytes && buffered) {
-      this.queue(Buffer.concat(buffered))
-      buffered = null
+    if ((opts.emitEmpty && !emittedChunk) || bufferedBytes) {
+      if (zeroPadding) {
+        var zeroes = new Buffer(size - bufferedBytes)
+        zeroes.fill(0)
+        buffered.push(zeroes)
+        this.queue(Buffer.concat(buffered))
+        buffered = null
+      } else {
+        this.queue(Buffer.concat(buffered))
+        buffered = null
+      }
     }
-
     this.queue(null)
   })
 }
