@@ -107,7 +107,7 @@ test('does not emit extra buffer if noEmpty and nopad is present', function (t) 
   )
 })
 
-test('does not emit extra buffer if noEmpty and nopad is present', function (t) {
+test('does not emit extra buffer if noEmpty is present', function (t) {
   t.plan(4)
 
   pull(
