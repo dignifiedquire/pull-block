@@ -1,6 +1,7 @@
 'use strict'
 
 var test = require('tape')
+var Buffer = require('safe-buffer').Buffer
 
 var pull = require('pull-stream')
 
@@ -11,9 +12,9 @@ test("don't pad, small writes", function (t) {
 
   pull(
     pull.values([
-      new Buffer('a'),
-      new Buffer('b'),
-      new Buffer('c')
+      Buffer.from('a'),
+      Buffer.from('b'),
+      Buffer.from('c')
     ]),
     block(16, {nopad: true}),
     pull.through(function (c) {
@@ -33,7 +34,7 @@ test("don't pad, exact write", function (t) {
 
   pull(
     pull.values([
-      new Buffer('abcdefghijklmnop')
+      Buffer.from('abcdefghijklmnop')
     ]),
     block(16, {nopad: true}),
     pull.through(function (c) {
@@ -58,7 +59,7 @@ test("don't pad, big write", function (t) {
 
   pull(
     pull.values([
-      new Buffer('abcdefghijklmnopq')
+      Buffer.from('abcdefghijklmnopq')
     ]),
     block(16, {nopad: true}),
     pull.through(function (c) {

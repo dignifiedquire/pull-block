@@ -1,6 +1,7 @@
 'use strict'
 
 var through = require('pull-through')
+var Buffer = require('safe-buffer').Buffer
 
 module.exports = function block (size, opts) {
   if (!opts) opts = {}
@@ -39,12 +40,14 @@ module.exports = function block (size, opts) {
   }, function flush (end) {
     if ((opts.emitEmpty && !emittedChunk) || bufferedBytes) {
       if (zeroPadding) {
-        var zeroes = new Buffer(size - bufferedBytes)
+        var zeroes = Buffer.alloc(size - bufferedBytes)
         zeroes.fill(0)
         buffered.push(zeroes)
       }
-      this.queue(Buffer.concat(buffered))
-      buffered = null
+      if (buffered) {
+        this.queue(Buffer.concat(buffered))
+        buffered = null
+      }
     }
     this.queue(null)
   })

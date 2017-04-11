@@ -1,7 +1,7 @@
 'use strict'
 
 var test = require('tape')
-
+var Buffer = require('safe-buffer').Buffer
 var pull = require('pull-stream')
 
 var block = require('../')
@@ -22,10 +22,10 @@ writeCounts.forEach(function (writeCount) {
 
         var input = []
         for (var i = 0; i < writeCount; i++) {
-          var a = new Buffer(writeSize)
+          var a = Buffer.alloc(writeSize)
           var j
           for (j = 0; j < writeSize; j++) a[j] = 'a'.charCodeAt(0)
-          var b = new Buffer(writeSize)
+          var b = Buffer.alloc(writeSize)
           for (j = 0; j < writeSize; j++) b[j] = 'b'.charCodeAt(0)
           input.push(a)
           input.push(b)

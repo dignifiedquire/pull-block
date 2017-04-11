@@ -1,7 +1,7 @@
 'use strict'
 
 var test = require('tape')
-
+var Buffer = require('safe-buffer').Buffer
 var pull = require('pull-stream')
 
 var block = require('../')
@@ -11,9 +11,9 @@ test('does not emit on empty buffers', function (t) {
 
   pull(
     pull.values([
-      new Buffer([]),
-      new Buffer([]),
-      new Buffer([])
+      Buffer.alloc(0),
+      Buffer.alloc(0),
+      Buffer.alloc(0)
     ]),
     block(),
     pull.collect(function (err, buffers) {
@@ -42,9 +42,9 @@ test('respects noEmpty option and nopad on empty buffers', function (t) {
 
   pull(
     pull.values([
-      new Buffer([]),
-      new Buffer([]),
-      new Buffer([])
+      Buffer.alloc(0),
+      Buffer.alloc(0),
+      Buffer.alloc(0)
     ]),
     block({ emitEmpty: true, nopad: true }),
     pull.collect(function (err, buffers) {
@@ -75,9 +75,9 @@ test('respects noEmpty option on empty buffers', function (t) {
 
   pull(
     pull.values([
-      new Buffer([]),
-      new Buffer([]),
-      new Buffer([])
+      Buffer.alloc(0),
+      Buffer.alloc(0),
+      Buffer.alloc(0)
     ]),
     block({ emitEmpty: true }),
     pull.collect(function (err, buffers) {
@@ -94,9 +94,9 @@ test('does not emit extra buffer if noEmpty and nopad is present', function (t) 
 
   pull(
     pull.values([
-      new Buffer([]),
-      new Buffer('hey'),
-      new Buffer([])
+      Buffer.alloc(0),
+      Buffer.from('hey'),
+      Buffer.alloc(0)
     ]),
     block({ emitEmpty: true, nopad: true }),
     pull.collect(function (err, buffers) {
@@ -112,16 +112,16 @@ test('does not emit extra buffer if noEmpty is present', function (t) {
 
   pull(
     pull.values([
-      new Buffer([]),
-      new Buffer('hey'),
-      new Buffer([])
+      Buffer.alloc(0),
+      Buffer.from('hey'),
+      Buffer.alloc(0)
     ]),
     block({ emitEmpty: true }),
     pull.collect(function (err, buffers) {
       t.error(err)
       t.equal(buffers.length, 1)
       t.equal(buffers[0].length, 512)
-      t.deepEqual(buffers[0], Buffer.concat([new Buffer('hey'), Buffer.alloc(512 - 3)]))
+      t.deepEqual(buffers[0], Buffer.concat([Buffer.from('hey'), Buffer.alloc(512 - 3)]))
     })
   )
 })
