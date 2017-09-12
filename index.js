@@ -30,13 +30,15 @@ module.exports = function block (size, opts) {
     bufferedBytes += data.length
     buffered.push(data)
 
+    var b = Buffer.concat(buffered)
+    var offset = 0
     while (bufferedBytes >= size) {
-      var b = Buffer.concat(buffered)
+      this.queue(b.slice(offset, offset + size))
+      offset += size
       bufferedBytes -= size
-      this.queue(b.slice(0, size))
-      buffered = [ b.slice(size, b.length) ]
       emittedChunk = true
     }
+    buffered = [ b.slice(offset, b.length) ]
   }, function flush (end) {
     if ((opts.emitEmpty && !emittedChunk) || bufferedBytes) {
       if (zeroPadding) {
