@@ -21,6 +21,7 @@ module.exports = function block (size, opts) {
 
   var buffered = []
   var bufferedBytes = 0
+  var bufferSkip = 0
   var emittedChunk = false
 
   return through(function transform (data) {
@@ -30,15 +31,29 @@ module.exports = function block (size, opts) {
     bufferedBytes += data.length
     buffered.push(data)
 
-    var b = Buffer.concat(buffered)
-    var offset = 0
     while (bufferedBytes >= size) {
-      this.queue(b.slice(offset, offset + size))
-      offset += size
-      bufferedBytes -= size
+      var copied = 0
+      var target = Buffer.alloc(size)
+
+      while (copied < size) {
+        var b = buffered[0]
+        var end = Math.min(bufferSkip + size - copied, b.length)
+
+        var c = b.copy(target, copied, bufferSkip, end)
+        copied += c
+        bufferedBytes -= c
+
+        if (end === b.length) {
+          buffered.shift()
+          bufferSkip = 0
+        } else {
+          bufferSkip += c
+        }
+      }
+
+      this.queue(target)
       emittedChunk = true
     }
-    buffered = [ b.slice(offset, b.length) ]
   }, function flush (end) {
     if ((opts.emitEmpty && !emittedChunk) || bufferedBytes) {
       if (zeroPadding) {
@@ -47,7 +62,7 @@ module.exports = function block (size, opts) {
         buffered.push(zeroes)
       }
       if (buffered) {
-        this.queue(Buffer.concat(buffered))
+        this.queue(Buffer.concat(buffered).slice(bufferSkip))
         buffered = null
       }
     }
