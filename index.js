@@ -21,24 +21,61 @@ module.exports = function block (size, opts) {
 
   var buffered = []
   var bufferedBytes = 0
+  var bufferSkip = 0
   var emittedChunk = false
 
   return through(function transform (data) {
     if (typeof data === 'number') {
-      data = Buffer([data])
+      data = Buffer.from([data])
     }
     bufferedBytes += data.length
     buffered.push(data)
 
-    var b = Buffer.concat(buffered)
-    var offset = 0
     while (bufferedBytes >= size) {
-      this.queue(b.slice(offset, offset + size))
-      offset += size
-      bufferedBytes -= size
+      var targetLength = 0
+      var target = []
+      var b
+      var out
+      var c = 0
+      var end = 0
+
+      while (targetLength < size) {
+        b = buffered[0]
+        end = bufferSkip + size - targetLength
+
+        if (end <= b.length) {
+          // large enough, just slice it
+          out = b.slice(bufferSkip, end)
+          c = out.length
+          targetLength += c
+          target.push(out)
+
+          if (end === b.length) {
+            buffered.shift()
+            bufferSkip = 0
+          } else {
+            bufferSkip += c
+          }
+        } else {
+          // not enough, push what we have
+          targetLength += b.length - bufferSkip
+          target.push(b.slice(bufferSkip, b.length))
+
+          buffered.shift()
+          bufferSkip = 0
+        }
+      }
+
+      bufferedBytes -= targetLength
+
+      if (target.length === 1) {
+        this.queue(target[0])
+      } else {
+        this.queue(Buffer.concat(target))
+      }
+
       emittedChunk = true
     }
-    buffered = [ b.slice(offset, b.length) ]
   }, function flush (end) {
     if ((opts.emitEmpty && !emittedChunk) || bufferedBytes) {
       if (zeroPadding) {
@@ -47,7 +84,7 @@ module.exports = function block (size, opts) {
         buffered.push(zeroes)
       }
       if (buffered) {
-        this.queue(Buffer.concat(buffered))
+        this.queue(Buffer.concat(buffered).slice(bufferSkip))
         buffered = null
       }
     }

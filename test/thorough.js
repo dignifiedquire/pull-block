@@ -6,8 +6,8 @@ var pull = require('pull-stream')
 
 var block = require('../')
 
-var blockSizes = [16]//, 25]//, 1024]
-var writeSizes = [4, 15, 16, 17, 64]//, 64, 100]
+var blockSizes = [16, 25, 1024]
+var writeSizes = [4, 15, 16, 17, 64, 64, 100]
 var writeCounts = [1, 10]//, 100]
 
 writeCounts.forEach(function (writeCount) {
