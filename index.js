@@ -3,6 +3,11 @@
 var through = require('pull-through')
 var Buffer = require('safe-buffer').Buffer
 
+function lazyConcat (buffers) {
+  if (buffers.length === 1) return buffers[0]
+  return Buffer.concat(buffers)
+}
+
 module.exports = function block (size, opts) {
   if (!opts) opts = {}
   if (typeof size === 'object') {
@@ -56,13 +61,7 @@ module.exports = function block (size, opts) {
       }
 
       bufferedBytes -= targetLength
-
-      // Try to avoid concat, as it copies data.
-      if (target.length === 1) {
-        this.queue(target[0])
-      } else {
-        this.queue(Buffer.concat(target))
-      }
+      this.queue(lazyConcat(target))
 
       emittedChunk = true
     }
@@ -78,7 +77,8 @@ module.exports = function block (size, opts) {
           // Don't copy the bufferSkip bytes through concat.
           buffered[0] = buffered[0].slice(bufferSkip)
         }
-        this.queue(Buffer.concat(buffered))
+
+        this.queue(lazyConcat(buffered))
         buffered = null
       }
     }
