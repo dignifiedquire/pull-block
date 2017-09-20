@@ -74,7 +74,11 @@ module.exports = function block (size, opts) {
         buffered.push(zeroes)
       }
       if (buffered) {
-        this.queue(Buffer.concat(buffered).slice(bufferSkip))
+        if (buffered.length > 0) {
+          // Don't copy the bufferSkip bytes through concat.
+          buffered[0] = buffered[0].slice(bufferSkip)
+        }
+        this.queue(Buffer.concat(buffered))
         buffered = null
       }
     }
