@@ -34,40 +34,30 @@ module.exports = function block (size, opts) {
     while (bufferedBytes >= size) {
       var targetLength = 0
       var target = []
-      var b
-      var out
-      var c = 0
-      var end = 0
+      var b, end, out
 
       while (targetLength < size) {
         b = buffered[0]
-        end = bufferSkip + size - targetLength
 
-        if (end <= b.length) {
-          // large enough, just slice it
-          out = b.slice(bufferSkip, end)
-          c = out.length
-          targetLength += c
-          target.push(out)
+        // Slice as much as we can from the next buffer.
+        end = Math.min(bufferSkip + size - targetLength, b.length)
+        out = b.slice(bufferSkip, end)
+        targetLength += out.length
+        target.push(out)
 
-          if (end === b.length) {
-            buffered.shift()
-            bufferSkip = 0
-          } else {
-            bufferSkip += c
-          }
-        } else {
-          // not enough, push what we have
-          targetLength += b.length - bufferSkip
-          target.push(b.slice(bufferSkip, b.length))
-
+        if (end === b.length) {
+          // If that "consumes" the buffer, remove it.
           buffered.shift()
           bufferSkip = 0
+        } else {
+          // Otherwise keep track of how much we used.
+          bufferSkip += out.length
         }
       }
 
       bufferedBytes -= targetLength
 
+      // Try to avoid concat, as it copies data.
       if (target.length === 1) {
         this.queue(target[0])
       } else {
