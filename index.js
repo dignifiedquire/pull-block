@@ -3,6 +3,8 @@
 var through = require('pull-through')
 var Buffer = require('safe-buffer').Buffer
 
+var SQUASH_BUFFER_THRESHOLD = 128
+
 function lazyConcat (buffers) {
   if (buffers.length === 1) return buffers[0]
   return Buffer.concat(buffers)
@@ -40,6 +42,13 @@ module.exports = function block (size, opts) {
       var targetLength = 0
       var target = []
       var b, end, out
+
+      if (buffered.length > SQUASH_BUFFER_THRESHOLD) {
+        buffered = [
+          Buffer.concat(buffered.slice(0, buffered.length - 1)),
+          buffered[buffered.length - 1]
+        ]
+      }
 
       while (targetLength < size) {
         b = buffered[0]
