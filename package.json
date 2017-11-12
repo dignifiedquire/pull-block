@@ -1,6 +1,6 @@
 {
   "name": "pull-block",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "transform input into equally-sized blocks of output",
   "main": "index.js",
   "dependencies": {
