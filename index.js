@@ -8,6 +8,11 @@ function lazyConcat (buffers) {
   return Buffer.concat(buffers)
 }
 
+function lazySlice (buf, begin, end) {
+  if (begin === 0 && end === buf.length) return buf
+  return buf.slice(begin, end)
+}
+
 module.exports = function block (size, opts) {
   if (!opts) opts = {}
   if (typeof size === 'object') {
@@ -39,20 +44,21 @@ module.exports = function block (size, opts) {
     while (bufferedBytes >= size) {
       var targetLength = 0
       var target = []
+      var index = 0
       var b, end, out
 
       while (targetLength < size) {
-        b = buffered[0]
+        b = buffered[index]
 
         // Slice as much as we can from the next buffer.
         end = Math.min(bufferSkip + size - targetLength, b.length)
-        out = b.slice(bufferSkip, end)
+        out = lazySlice(b, bufferSkip, end)
         targetLength += out.length
         target.push(out)
 
         if (end === b.length) {
-          // If that "consumes" the buffer, remove it.
-          buffered.shift()
+          // If that consumes the buffer, move on to the next.
+          index++
           bufferSkip = 0
         } else {
           // Otherwise keep track of how much we used.
@@ -60,6 +66,8 @@ module.exports = function block (size, opts) {
         }
       }
 
+      // Remove all consumed buffers and output the selection.
+      buffered = buffered.slice(index)
       bufferedBytes -= targetLength
       this.queue(lazyConcat(target))
 
