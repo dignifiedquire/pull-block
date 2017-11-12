@@ -1,7 +1,6 @@
 'use strict'
 
 var test = require('tape')
-var Buffer = require('safe-buffer').Buffer
 
 var pull = require('pull-stream')
 

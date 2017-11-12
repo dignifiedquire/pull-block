@@ -4,15 +4,14 @@
   "description": "transform input into equally-sized blocks of output",
   "main": "index.js",
   "dependencies": {
-    "pull-through": "^1.0.18",
-    "safe-buffer": "^5.0.1"
+    "pull-through": "^1.0.18"
   },
   "devDependencies": {
     "pull-file": "^1.0.0",
-    "pull-stream": "^3.5.0",
-    "standard": "^10.0.1",
+    "pull-stream": "^3.6.1",
+    "standard": "^10.0.3",
     "stream-to-pull-stream": "^1.7.2",
-    "tape": "^4.6.3"
+    "tape": "^4.8.0"
   },
   "scripts": {
     "test": "npm run lint && tape test/*.js",

@@ -1,7 +1,6 @@
 'use strict'
 
 var through = require('pull-through')
-var Buffer = require('safe-buffer').Buffer
 
 function lazyConcat (buffers) {
   if (buffers.length === 1) return buffers[0]
